@@ -15,7 +15,7 @@ opencode 技能集，用於改善 Kotlin Multiplatform 開發體驗。
 git clone https://github.com/TwhomeGH/opencode-skills.git
 ```
 
-在 `opencode.json` 加入：
+在 `opencode.json`（**專案目錄**或 `~/.config/opencode/`）加入：
 
 ```json
 {
@@ -25,7 +25,7 @@ git clone https://github.com/TwhomeGH/opencode-skills.git
 }
 ```
 
-詳細說明見 [docs/INSTALL.md](docs/INSTALL.md)。
+詳細說明見 [docs/INSTALL.md](docs/INSTALL.md)，包含各平台路徑範例。
 
 ## License
 
