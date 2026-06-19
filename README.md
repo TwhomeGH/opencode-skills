@@ -9,6 +9,7 @@ opencode 技能集，用於改善 Kotlin Multiplatform 開發體驗。
 | **kotlin-multiplatform-workspace** | 限制搜尋範圍到專案根目錄，避免全硬碟掃描導致 CPU 滿載 |
 | **translate-to-chinese** | 繁體中文（zh-TW）回覆翻譯 |
 | **filter-html-noise** | 預設啟用的 HTML 雜訊過濾技能。分析 HTML 時自動忽略無語義的視覺雜訊，保留業務邏輯相關內容 |
+| **context-cleanup** | 預設啟用的 token 使用效率技能。控制 output tokens、避免重複敘述、減少不必要的工具呼叫 |
 
 ## 安裝
 
