@@ -29,6 +29,59 @@ git clone https://github.com/TwhomeGH/opencode-skills.git
 
 詳細說明見 [docs/INSTALL.md](docs/INSTALL.md)，包含各平台路徑範例。
 
+## 完整設定範例
+
+搭配本技能集的 `~/.config/opencode/opencode.jsonc` 完整範例：
+
+```jsonc
+{
+  "$schema": "https://opencode.ai/config.json",
+
+  "skills": {
+    "paths": ["F:/opencode-skills/skills"]
+  },
+
+  "plugin": ["opencode-lmstudio"],
+
+  "provider": {
+    "lmstudio": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "LM Studio",
+      "options": {
+        "baseURL": "http://192.168.0.102:1234/v1",
+        "apiKey": "sk-lm-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    }
+  },
+
+  "references": {
+    "playwright-mcp": {
+      "repository": "microsoft/playwright-mcp",
+      "description": "Use for Playwright MCP browser automation server configuration and usage"
+    },
+    "mcp-memory": {
+      "repository": "modelcontextprotocol/servers",
+      "description": "Use for MCP memory/knowledge graph server configuration"
+    }
+  },
+
+  "mcp": {
+    "playwright": {
+      "type": "local",
+      "command": ["npx", "-y", "@playwright/mcp"],
+      "enabled": true
+    },
+    "memory": {
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-memory"],
+      "enabled": true
+    }
+  }
+}
+```
+
+> `model` 與 `small_model` 未指定，由 opencode 啟動時選擇或手動切換。
+
 ## License
 
 [MIT](LICENSE)
