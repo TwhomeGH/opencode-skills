@@ -62,6 +62,26 @@ git clone https://github.com/TwhomeGH/opencode-skills.git
     "mcp-memory": {
       "repository": "modelcontextprotocol/servers",
       "description": "Use for MCP memory/knowledge graph server configuration"
+    },
+    "mcp-filesystem": {
+      "repository": "modelcontextprotocol/servers",
+      "description": "Use for MCP filesystem server for secure file operations"
+    },
+    "mcp-git": {
+      "repository": "modelcontextprotocol/servers",
+      "description": "Use for MCP git server for repository operations"
+    },
+    "mcp-github": {
+      "repository": "github/github-mcp-server",
+      "description": "Use for GitHub MCP server for PR, issue, and repo management"
+    },
+    "mcp-fetch": {
+      "repository": "modelcontextprotocol/servers",
+      "description": "Use for MCP fetch server for web content retrieval"
+    },
+    "mcp-sequential-thinking": {
+      "repository": "modelcontextprotocol/servers",
+      "description": "Use for MCP sequential thinking server for structured reasoning"
     }
   },
 
@@ -75,6 +95,34 @@ git clone https://github.com/TwhomeGH/opencode-skills.git
       "type": "local",
       "command": ["npx", "-y", "@modelcontextprotocol/server-memory"],
       "enabled": true
+    },
+    "filesystem": {
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-filesystem", "F:/opencode-skills"],
+      "enabled": false
+    },
+    "git": {
+      "type": "local",
+      "command": ["npx", "-y", "mcp-server-git", "--repository", "."],
+      "enabled": false
+    },
+    "github": {
+      "type": "local",
+      "command": ["npx", "-y", "@github/github-mcp-server"],
+      "enabled": false,
+      "env": {
+        "GITHUB_TOKEN": "ghp_xxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    "fetch": {
+      "type": "local",
+      "command": ["npx", "-y", "mcp-server-fetch"],
+      "enabled": false
+    },
+    "sequential-thinking": {
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "enabled": false
     }
   }
 }
