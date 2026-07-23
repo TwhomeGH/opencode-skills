@@ -116,7 +116,7 @@ git clone https://github.com/TwhomeGH/opencode-skills.git
     },
     "fetch": {
       "type": "local",
-      "command": ["npx", "-y", "mcp-server-fetch"],
+      "command": ["uvx", "mcp-server-fetch"],
       "enabled": false
     },
     "sequential-thinking": {

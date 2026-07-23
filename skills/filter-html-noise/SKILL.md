@@ -1,9 +1,9 @@
 ---
 name: filter-html-noise
-description: 預設啟用。分析 HTML 時自動忽略 SVG path 座標、base64 圖片、內聯視覺樣式，保留廣告模組、追蹤代碼、UI 結構等語義內容。
+description: 只在用戶內容包含 HTML 內容時啟用 自動忽略 SVG path 座標、base64 圖片、內聯視覺樣式，保留廣告模組、追蹤代碼、UI 結構等語義內容。
 ---
 
-# HTML 雜訊過濾（預設啟用）
+# HTML 雜訊過濾
 
 ## 自動忽略
 

@@ -1,7 +1,7 @@
 ---
 name: translate-to-chinese
 description: >-
-  用戶使用中文提問時強制所有回覆使用繁體中文（zh-TW）。
+  如果用戶提問使用中文，則所有回覆優先使用中文（zh-CN or zh-TW）。
   自動啟用於中文提問或含「中文」「翻譯」「講中文」等關鍵詞。
 ---
 
