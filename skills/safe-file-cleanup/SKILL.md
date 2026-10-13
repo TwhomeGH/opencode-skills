@@ -1,6 +1,6 @@
 ---
 name: safe-file-cleanup
-description: 在準備刪除、清理或移除本機檔案與資料夾時使用，包括其他任務中的附帶清理。Windows 預設使用系統回收站；Docker 或沒有可用回收站的環境，先確認具體永久刪除範圍，或提供手動清理指引。不適用於只從文件中刪除文字。
+description: 在準備刪除、清理或移除本機檔案與資料夾時使用，包括其他任務中的附帶清理，以及工具臨時產生腳本的保留與清理判斷。依 Windows、macOS、Linux 環境使用可用的系統回收站；容器或無可用回收站時，先確認具體永久刪除範圍，或提供手動清理指引。不適用於只從文件中刪除文字。
 ---
 
 # 安全清理檔案
@@ -11,23 +11,56 @@ description: 在準備刪除、清理或移除本機檔案與資料夾時使用�
 - 操作前解析並列出絕對路徑；資料夾需確認內容、檔案數量與範圍。檢查 junction、符號連結及掛載點，避免跟隨到其他位置。批次目標使用已核對的明確清單，不以萬用字元擴大範圍。
 - 用簡短說明交代：將處理哪些檔案／資料夾、採用回收站還是永久刪除。檢查與執行之間內容若有改變，重新核對。
 
+## 各平台共通原則
+
+- 先辨識實際執行環境、目標所在檔案系統與使用者身分，再選擇 Windows、macOS 或 Linux 的回收方式。遠端主機、WSL、容器及掛載磁碟須按實際目標判斷，不能只依使用者電腦的作業系統選擇。
+- 已有清理授權即可進行可還原回收，不重複確認。回收失敗、工具缺失或磁碟不支援時保留檔案，不自動改成永久刪除；也不得自行清空垃圾桶。永久刪除須有涵蓋確切目標與不可回收性質的明確授權。
+- 檢查逐項回收結果與取消狀態；可行時核對垃圾桶項目及原始位置。原路徑消失不代表回收成功，部分完成須如實回報。若無法可靠自動回收，可提供該平台檔案管理員的「移到垃圾桶／回收站」操作；遇到永久刪除提示先取消。
+
+## 工具臨時產生的腳本：先保存，再判斷用途
+
+- 工具或代理為完成任務產生的腳本，可能包含可重用的轉換、驗證或自動化邏輯。不得僅因檔名含 temp、位於暫存目錄、由工具產生或已執行完畢，就視為可刪除。一般「清理暫存檔」不自動涵蓋這些腳本；若使用者已明確指定刪除它們，依既有授權處理，不重複詢問。
+- 需要落地保存臨時腳本時，優先沿用專案既有慣例；否則在允許寫入的工作區使用專屬目錄，例如 `.scratch/scripts/<任務識別>/`，與輸出、快取分開。按實際需要建立，使用能辨識用途的檔名，簡短記錄用途、執行方式與依賴；不把作業系統可能自動清理的暫存區當作保留位置。已存在其他位置的腳本，先檢查引用及路徑依賴再搬移。
+- 清理前查看腳本內容與呼叫關係，區分一次性包裝、可重用邏輯，以及仍被其他流程依賴的腳本。沒有把握時先保留；不要為了判斷價值而執行未知或有副作用的腳本。刪除包含腳本的上層資料夾前，也必須完成這項檢查。
+- 發現重用價值時，先整理具體用途與可提煉內容，再一次詢問使用者是否需要將提煉後的腳本用於其他任務、專案或 skill。提供「保留原稿／提煉重用／按已說明方式清理」等清楚選項；等待回覆期間保留原稿，繼續其他不受影響的工作。不要為每個瑣碎腳本逐一詢問，也不要未經要求擴大成完整工具開發。
+- 決定提煉時，將任務專用路徑與參數抽出，移除硬編碼憑證及無關資料，補足必要的使用說明，按副作用選擇安全的驗證方式。先在目前授權的工作區準備可檢視版本；寫入其他專案或安裝為共用工具須符合使用者指定範圍。提煉完成不等於原稿已獲清理授權。
+- 收尾時簡短交代保留腳本的路徑、用途及是否已驗證。對確定不再需要且已獲清理授權的腳本，仍依下列回收站或永久刪除規則處理；不得因移到專屬暫存目錄就自動清空，也不自行設定到期刪除。
+
 ## Windows：預設送進系統回收站
 
-- 使用 Windows Shell 正式的回收站操作，例如 IFileOperation 搭配回收旗標；亦可使用 Microsoft.VisualBasic.FileIO.FileSystem 的 DeleteFile／DeleteDirectory，明確指定 RecycleOption.SendToRecycleBin，並使用 UICancelOption.ThrowException 辨識取消。
+- 使用 Windows Shell 正式的回收站操作，例如 IFileOperation；Windows 8 以上可明確指定 FOFX_RECYCLEONDELETE。回收旗標不是所有磁碟與執行情境下的成功保證；須處理取消、錯誤及永久刪除警告，不使用自動答應所有提示的設定。
+- 亦可使用 Microsoft.VisualBasic.FileIO.FileSystem 的 DeleteFile／DeleteDirectory，明確指定 RecycleOption.SendToRecycleBin，並使用 UICancelOption.ThrowException 辨識取消。這些 API 仍有官方文件，並未標示棄用；使用前確認目前 .NET 可載入相關方法，且在互動式 Windows 使用者環境執行。官方不支援在 Windows Service 等非互動程式使用這些回收與 UI 選項；不得將此方法當成跨平台回收介面。
 - `$RECYCLE.BIN` 是系統管理的儲存位置。不要自行建立同名資料夾，也不要直接 Move-Item 到其中；那樣不保證有原始路徑與還原中繼資料。
 - 不以 Remove-Item、del、rmdir、rm、Python unlink/rmtree 等永久刪除方式代替回收站。不得因回收失敗、權限不足或磁碟不支援而自動降級為永久刪除。
 - 選擇能回報取消與失敗、且不會無提示永久刪除的回收操作。若 API 或環境無法保證此行為，改由使用者在檔案總管操作：選取已列明的目標，使用一般 Delete／移至回收站，避免 Shift+Delete；如系統提示永久刪除，先取消。
 - 操作後確認原位置與回收操作結果；可行時核對回收站項目的原始位置。原路徑消失不等於已成功回收。只回報已驗證的結果，取消或部分完成時明確列出狀態。
 - 既有清理授權足以進行可還原的回收，不需重複確認。只有使用者明確指定永久刪除並涵蓋確切目標時，才可按該例外處理；不得自行清空回收站。
 
+## macOS：使用系統垃圾桶
+
+- 優先使用 Foundation 的 `FileManager.trashItem(at:resultingItemURL:)`，或引導使用者在 Finder 選擇「移到垃圾桶」。檢查 API 的錯誤及傳回的垃圾桶位置，不以 `removeItem` 或 `rm` 代替。
+- 垃圾桶位置由系統依使用者與目標磁碟決定；需要查詢時使用 FileManager 的 `.trashDirectory` 與適用目標 URL，不硬編碼單一路徑。不要自行搬進 `~/.Trash` 就宣稱已完成系統回收，也不要假設外接磁碟與網路磁碟都支援。
+
+## Linux：使用桌面環境相容的 Trash
+
+- 先確認已安裝且適用於目標檔案系統的回收工具，例如 `gio trash` 或遵循 freedesktop.org Trash 規格的工具；也可使用 GIO 的 `GFile.trash` API。檢查工具版本、使用方式及逐項結果；不支援回收時停止，不改用 `rm`。
+- freedesktop.org 規格的使用者回收站是 `$XDG_DATA_HOME/Trash`，未設定時通常為 `~/.local/share/Trash`；其他磁碟可能使用掛載根目錄下的 `.Trash/<uid>` 或 `.Trash-<uid>`。這些是規格位置，不是可以任意搬入檔案的目的地：須由相容工具維護 `files`、`info` 與原始路徑等還原資料。
+- 不因 Linux、SSH 或無桌面畫面就直接判定沒有回收功能，也不假設一定已安裝工具。以實際工具、使用者身分、權限與掛載支援為準，不使用 sudo 改成另一位使用者的回收站。無可用工具時保留檔案並進入下節流程。
+
 ## Docker、容器或沒有可用回收站
 
 - 先確認是在容器內、主機上、bind mount 還是 Docker volume。容器內的刪除可能直接影響主機或共享資料，不能假設容器就是隔離的暫存區。
 - 不把容器內自建的 `$RECYCLE.BIN` 當成 Windows 回收站，也不自動執行 rm -rf、docker volume rm 或 prune。
 - 無可用回收站時，執行永久刪除前，必須取得使用者對具體絕對路徑／容器或 volume 身分，以及「無法透過回收站還原」的明確確認。先前只說「清掉」不代表已同意永久刪除；若已有同等明確授權則不重問。
-- 未取得確認或無法可靠核對掛載關係時，停止刪除，提供 GUI 或 CLI 手動清理步驟。若是 Windows 主機的 bind mount，優先引導使用者從主機回收對應檔案。
+- 未取得確認或無法可靠核對掛載關係時，停止刪除，提供 GUI 或 CLI 手動清理步驟。若是主機的 bind mount，核對主機對應路徑後，優先使用主機作業系統的回收功能。
 - 每個手動指令都說明執行位置、精確目標與影響範圍，以及是否永久刪除。先提供唯讀列出目標的指令，再提供獨立的清理指令；避免全域清理、模糊路徑與未檢查的變數。
 
 ## 需要確認時的說明
 
 若因本技能而暫停，明確指出原因來自本技能，連結正在使用的 SKILL.md，引用相關規則，並列明等待確認的目標與刪除方式。不要只說「基於安全」。此技能不授權任何原本未要求的清理。
+
+## 官方參考
+
+- Windows：[IFileOperation 旗標](https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/nf-shobjidl_core-ifileoperation-setoperationflags)、[FileSystem.DeleteFile 與非互動環境限制](https://learn.microsoft.com/en-us/dotnet/api/microsoft.visualbasic.fileio.filesystem.deletefile)。
+- macOS：[FileManager.trashItem](https://developer.apple.com/documentation/foundation/filemanager/trashitem(at:resultingitemurl:))。
+- Linux：[GIO trash API](https://docs.gtk.org/gio/method.File.trash.html)、[freedesktop.org Trash 規格](https://specifications.freedesktop.org/trash/1.0/)。
