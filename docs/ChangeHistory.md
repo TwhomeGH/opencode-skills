@@ -1,5 +1,22 @@
 # ChangeHistory
 
+## 2026.10.14 16:03 修正 clean-code references 的裸 URL（markdownlint MD034）
+
+**類型**: 修正 · **檔案**: `skills/clean-code/references/*.md`
+
+### 問題 - 官方參考用裸 URL，觸發 markdownlint MD034
+
+`clean-code/references/` 各檔的「官方」清單直接貼上裸 URL（如 `- https://go.dev/doc/comment`），markdownlint 報 MD034/no-bare-urls；在非 GFM 的渲染器（如 changelogkit 的 markdown.js）可能不會自動變成可點連結。
+
+### 根因 - 撰寫參考檔時直接貼 URL，未改成連結語法
+
+### 修改 - 統一改成 `[文字](url)` 連結
+
+- 8 個 references 檔（swift／kotlin-java／typescript-javascript／python／rust／go／csharp／windows-scripts）的「官方」清單改為 `[標題](url)`，與 repo 其他處（各 SKILL.md 的官方參考）一致。
+- 同一修正已同步到 `~/.codex/skills/clean-code/references/`（該處為 repo 的複本）。
+
+---
+
 ## 2026.10.14 15:40 校正 README 技能表與實際目錄一致
 
 **類型**: 修正 · **檔案**: `README.md`

@@ -22,4 +22,4 @@ package mathx
 
 ## 官方
 
-- https://go.dev/doc/comment
+- [Go Doc Comments](https://go.dev/doc/comment)

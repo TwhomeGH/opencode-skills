@@ -34,4 +34,4 @@ pub fn add(a: i32, b: i32) -> i32 {
 
 ## 官方
 
-- https://doc.rust-lang.org/rustdoc/how-to-write-documentation.html
+- [How to write documentation (rustdoc)](https://doc.rust-lang.org/rustdoc/how-to-write-documentation.html)

@@ -43,5 +43,5 @@ public BigDecimal multiply(BigDecimal a, BigDecimal b)
 
 ## 官方
 
-- Kotlin KDoc: https://kotlinlang.org/docs/kotlin-doc.html
-- Java Javadoc: https://www.oracle.com/technetwork/java/javase/documentation/index-137868.html
+- [Kotlin KDoc](https://kotlinlang.org/docs/kotlin-doc.html)
+- [Java Javadoc](https://www.oracle.com/technetwork/java/javase/documentation/index-137868.html)

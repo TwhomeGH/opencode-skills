@@ -62,6 +62,6 @@ def divide(a, b):
 
 ## 官方
 
-- PEP 257: https://peps.python.org/pep-0257/
-- Google Style: https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings
-- NumPy: https://numpydoc.readthedocs.io/en/latest/format.html
+- [PEP 257](https://peps.python.org/pep-0257/)
+- [Google Style](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings)
+- [NumPy](https://numpydoc.readthedocs.io/en/latest/format.html)

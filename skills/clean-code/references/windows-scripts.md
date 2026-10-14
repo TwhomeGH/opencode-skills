@@ -55,5 +55,5 @@ Rem 另一種寫法。
 
 ## 官方
 
-- PowerShell comment-based help: https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_comment_based_help
-- cmd `rem`: https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/rem
+- [PowerShell comment-based help](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_comment_based_help)
+- [rem (cmd)](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/rem)

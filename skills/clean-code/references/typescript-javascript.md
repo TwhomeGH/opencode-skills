@@ -20,5 +20,5 @@ async function getUser(id: string): Promise<User | undefined>
 
 ## 官方
 
-- JSDoc: https://jsdoc.app/
-- TSDoc: https://tsdoc.org/
+- [JSDoc](https://jsdoc.app/)
+- [TSDoc](https://tsdoc.org/)

@@ -24,4 +24,4 @@ public async Task<User?> GetUserAsync(string id)
 
 ## 官方
 
-- https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/xmldoc/
+- [XML documentation comments](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/xmldoc/)
