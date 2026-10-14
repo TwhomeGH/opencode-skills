@@ -1,0 +1,10 @@
+# changelogkit 設定：本 repo 的變更歷史與開發索引。
+# 用法（未全域安裝時）：設定 PYTHONPATH 指向 ChangeLogTools/src，再執行 python -m changelogkit。
+[tool.changelog]
+title   = "opencode-skills 變更歷史"
+history = "docs/ChangeHistory.md"
+
+# 開發索引的來源（本 repo 自身）。
+[[tool.changelog.sources]]
+name = "opencode-skills"
+path = "."
