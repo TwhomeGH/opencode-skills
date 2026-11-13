@@ -1,0 +1,67 @@
+# 匯出 changelogkit 唯讀靜態站並部署到 GitHub Pages。
+# 前置：repo Settings → Pages → Source 選「GitHub Actions」。
+name: "Pages"
+
+on:
+  push:
+    branches: [<BRANCH>]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # 需要完整歷史才能列 commits 與 diff
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      # 套件未上 PyPI：每次解析最新 tag，自動跟上 changelogkit 的更新。
+      # 需要可重現的建置時，在 repo 變數設定 CHANGELOGKIT_REF=<tag> 覆寫。
+      - name: Install changelogkit
+        env:
+          CHANGELOGKIT_REF: ${{ vars.CHANGELOGKIT_REF }}
+        run: |
+          ref="${CHANGELOGKIT_REF:-}"
+          if [ -z "$ref" ]; then
+            ref="$(git ls-remote --tags --refs https://github.com/TwhomeGH/ChangeLogKit.git \
+              | awk -F/ '{print $NF}' | grep -E '^v[0-9]+(\.[0-9]+)*$' | sort -V | tail -1)"
+          fi
+          echo "Installing changelogkit@$ref"
+          python -m pip install "git+https://github.com/TwhomeGH/ChangeLogKit.git@$ref"
+
+      - name: Export static site
+        run: changelogkit --locale zh-TW export _site --branch <BRANCH>
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v6
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

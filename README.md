@@ -14,6 +14,7 @@ opencode 技能集，用於改善 Kotlin Multiplatform 開發體驗。
 | **safe-file-cleanup** | 準備刪除 / 清理本機檔案或資料夾時使用。依 Windows / macOS / Linux 送入系統回收站；無回收站時先確認永久刪除範圍 |
 | **file-fix** | 寫入文件遇到問題時使用。退回指導使用者替換指定段落並說明前後差異，避免只為改檔而新建臨時腳本 |
 | **swift-test** | Swift 測試。非 macOS 環境預設跳過；已安裝 Swift 編譯器時可編譯檢查與執行 `swift test` |
+| **changelogkit-setup** | 在任一新專案接入 changelogkit（設定、變更歷史、主待辦、Pages 靜態站）。旗標一律向來源的 `--help`／`Docs/` 查，避免版本漂移 |
 
 ## 技能撰寫原則
 

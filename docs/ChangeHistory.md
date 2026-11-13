@@ -1,5 +1,27 @@
 # ChangeHistory
 
+## 2026.11.13 14:45 新增 changelogkit-setup 技能（薄技能設計）
+
+**類型**: 新增 · **檔案**: `skills/changelogkit-setup/`、`README.md`
+
+### 問題 - 每次把 changelogkit 接入新專案都要重踩同一批坑
+
+cp950 中文路徑不能 editable 安裝、`--locale` 必須放在子命令前、vendor 文件會淹沒索引、Pages 需要 `fetch-depth: 0`——這些只留在對話裡，換一個專案就要重新發現。
+
+### 根因 - 接入流程沒有可重用的技能，而工具旗標會隨版本變動
+
+把旗標抄進技能會立刻過期，還會與原始碼互相矛盾；需要把「流程與決策」和「工具本體」分離。
+
+### 修改 - 新增薄技能，旗標一律向來源查
+
+- `SKILL.md`：來源解析順序（`CHANGELOGKIT_SRC` → 詢問使用者 → PATH → 最新 tag）、7 步接入流程、自動偵測與必須詢問的分界、驗證門檻、明確不做清單。
+- `references/windows.md`：PYTHONPATH 用法、禁止 editable 安裝的原因、UTF-8 主控台、`--locale` 位置規則。
+- `references/vendor-noise.md`：以 `git ls-files '*.md'` 量測目錄占比，排除前後用 `docs --check` 驗證。
+- `assets/`：`.changelog.toml` 與 Pages workflow 模板；Pages 每次解析最新 tag，不釘死版本，可用 `CHANGELOGKIT_REF` 覆寫。
+- `README.md` 技能表補列。
+
+---
+
 ## 2026.10.14 16:03 修正 clean-code references 的裸 URL（markdownlint MD034）
 
 **類型**: 修正 · **檔案**: `skills/clean-code/references/*.md`
