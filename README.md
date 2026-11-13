@@ -15,6 +15,7 @@ opencode 技能集，用於改善 Kotlin Multiplatform 開發體驗。
 | **file-fix** | 寫入文件遇到問題時使用。退回指導使用者替換指定段落並說明前後差異，避免只為改檔而新建臨時腳本 |
 | **swift-test** | Swift 測試。非 macOS 環境預設跳過；已安裝 Swift 編譯器時可編譯檢查與執行 `swift test` |
 | **changelogkit-setup** | 在任一新專案接入 changelogkit（設定、變更歷史、主待辦、Pages 靜態站）。旗標一律向來源的 `--help`／`Docs/` 查，避免版本漂移 |
+| **aft-bash-inspector** | 檢視 AFT／OpenCode 背景 bash：列出執行中工作、看程序樹與輸出尾巴、即時跟隨 stdout／stderr（唯讀） |
 
 ## 技能撰寫原則
 

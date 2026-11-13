@@ -1,5 +1,26 @@
 # ChangeHistory
 
+## 2026.11.13 16:10 新增 aft-bash-inspector 技能（唯讀任務檢視器）
+
+**類型**: 新增 · **檔案**: `skills/aft-bash-inspector/`、`README.md`
+
+### 問題 - 背景 bash 只有 taskId 才能查，沒有「列出全部」的介面
+
+Agent 的 `bash_status`／`bash_watch`／`bash_kill` 都要先知道 taskId；工作一多或忘記 ID 時，只能猜或翻訊息。也看不到工作內部的程序樹（例如 cargo→rustc 誰在吃記憶體）。
+
+### 根因 - AFT 沒有暴露 session-wide 的任務清單
+
+`bash_owned_tasks` 是內部清理用；對外只提供單一 taskId 的查詢。任務狀態其實已寫在磁碟上的 `metadata.json`，但沒有工具去讀。
+
+### 修改 - 以 AFT 的任務目錄實作唯讀檢視器
+
+- `scripts/aft-bash.ps1`：`list`（執行中工作）、`show`（metadata＋程序樹＋輸出尾巴）、`watch`（輪詢跟隨輸出到結束）。
+- 支援 `AFT_STORAGE_DIR` 與 `%LOCALAPPDATA%\cortexkit\aft\<harness>\bash-tasks`；taskId 可用唯一前綴。
+- 唯讀、不提供 kill；ANSI 色碼在顯示時剝除，原始輸出保留。
+- `SKILL.md` 說明資料來源、判讀技巧與邊界。
+
+---
+
 ## 2026.11.13 15:20 以端到端測試修正 changelogkit-setup 的驗證判準
 
 **類型**: 修正 · **檔案**: `skills/changelogkit-setup/SKILL.md`、`assets/ChangeHistory.md.tpl`、`references/windows.md`
