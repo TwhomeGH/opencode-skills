@@ -65,42 +65,48 @@ function Get-TaskSearchRoots {
     return $roots
 }
 
-function Get-Tasks {
-    $tasks = New-Object System.Collections.Generic.List[object]
+function Get-TaskDirs {
+    $dirs = New-Object System.Collections.Generic.List[object]
     foreach ($pattern in (Get-TaskSearchRoots)) {
         Get-ChildItem -Path $pattern -Directory -ErrorAction SilentlyContinue | ForEach-Object {
             $tasksRoot = $_.FullName
             Get-ChildItem -Path $tasksRoot -Directory -ErrorAction SilentlyContinue | ForEach-Object {
                 $projectDir = $_.FullName
                 Get-ChildItem -Path $projectDir -Directory -Filter 'bash-*' -ErrorAction SilentlyContinue | ForEach-Object {
-                    $metaPath = Join-Path $_.FullName 'control\metadata.json'
-                    if (-not (Test-Path $metaPath)) { return }
-                    try {
-                        $meta = Get-Content $metaPath -Raw -Encoding utf8 | ConvertFrom-Json
-                    } catch {
-                        return
-                    }
-                    $tasks.Add([pscustomobject]@{ Dir = $_.FullName; Meta = $meta })
+                    $dirs.Add([pscustomobject]@{ Dir = $_.FullName; TaskId = $_.Name })
                 }
             }
         }
     }
-    return $tasks
+    return $dirs
+}
+
+function Read-TaskMeta([string]$Dir) {
+    $path = Join-Path $Dir 'control\metadata.json'
+    if (-not (Test-Path $path)) { return $null }
+    try {
+        return (Get-Content $path -Raw -Encoding utf8 | ConvertFrom-Json)
+    } catch {
+        return $null
+    }
 }
 
 function Resolve-Task([string]$Id) {
     if (-not $Id) {
         throw "show/watch need a task id. Run 'list' to see running tasks."
     }
-    $all = Get-Tasks
-    $exact = $all | Where-Object { $_.Meta.task_id -eq $Id }
-    if ($exact) { return $exact[0] }
-    $matches = @($all | Where-Object { $_.Meta.task_id -like "$Id*" })
-    if ($matches.Count -eq 1) { return $matches[0] }
-    if ($matches.Count -gt 1) {
-        throw "Task id prefix '$Id' is ambiguous: $($matches.Count) matches."
+    $all = @(Get-TaskDirs)
+    $hits = @($all | Where-Object { $_.TaskId -eq $Id })
+    if ($hits.Count -eq 0) {
+        $hits = @($all | Where-Object { $_.TaskId -like "$Id*" })
     }
-    throw "Task '$Id' not found under AFT storage."
+    if ($hits.Count -eq 0) { throw "Task '$Id' not found under AFT storage." }
+    if ($hits.Count -gt 1) {
+        throw "Task id prefix '$Id' is ambiguous: $($hits.Count) matches."
+    }
+    $meta = Read-TaskMeta $hits[0].Dir
+    if (-not $meta) { throw "Task '$($hits[0].TaskId)' has no readable metadata." }
+    return [pscustomobject]@{ Dir = $hits[0].Dir; Meta = $meta }
 }
 
 function Format-Duration([long]$Milliseconds) {
@@ -263,13 +269,20 @@ function Watch-Task($Task, [int]$PollMs) {
 
 switch ($Mode) {
     'list' {
-        $running = @(Get-Tasks | Where-Object { $_.Meta.status -eq 'running' } |
-            Sort-Object { $_.Meta.started_at })
+        $running = New-Object System.Collections.Generic.List[object]
+        foreach ($task in (Get-TaskDirs)) {
+            # A running task has no io\exit yet. Checking that first avoids
+            # parsing metadata for the hundreds of completed tasks on disk.
+            if (Test-Path (Join-Path $task.Dir 'io\exit')) { continue }
+            $meta = Read-TaskMeta $task.Dir
+            if (-not $meta -or $meta.status -ne 'running') { continue }
+            $running.Add([pscustomobject]@{ Dir = $task.Dir; Meta = $meta })
+        }
         if ($running.Count -eq 0) {
             Write-Output 'No running AFT bash tasks.'
             return
         }
-        $rows = $running | ForEach-Object {
+        $rows = $running | Sort-Object { $_.Meta.started_at } | ForEach-Object {
             $m = $_.Meta
             [pscustomobject]@{
                 Task    = $m.task_id

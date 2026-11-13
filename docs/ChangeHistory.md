@@ -1,5 +1,23 @@
 # ChangeHistory
 
+## 2026.11.13 16:35 aft-bash-inspector 加上 cmd 包裝並修正用法說明
+
+**類型**: 修正 · **檔案**: `skills/aft-bash-inspector/`
+
+### 問題 - 使用者從 cmd／PowerShell 呼叫時語法錯誤，且 list 掃描全部任務很慢
+
+`$tool list` 會 ParserError、`& tool list` 少了 `$`；cmd 不認得 PowerShell 變數。`list` 還會為數百個已完成任務逐一解析 metadata。
+
+### 根因 - 文件只給一種呼叫方式，且枚舉沒有先用便宜的條件過濾
+
+### 修改
+
+- 新增 `scripts/aft-bash.cmd`：cmd 直接執行，內部轉給 `pwsh -File`。
+- `list` 先用 `io\exit` 是否存在跳過已完成任務，只解析執行中的 metadata（實測 0.72 秒）。
+- `SKILL.md` 補上 `& $tool list`、`.cmd` 用法與常見語法錯誤對照表。
+
+---
+
 ## 2026.11.13 16:10 新增 aft-bash-inspector 技能（唯讀任務檢視器）
 
 **類型**: 新增 · **檔案**: `skills/aft-bash-inspector/`、`README.md`

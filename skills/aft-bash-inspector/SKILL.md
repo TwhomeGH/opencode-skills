@@ -13,14 +13,31 @@ Agent 端的 `bash_status`／`bash_watch`／`bash_kill` 都需要先有 `taskId`
 ## 快速使用
 
 ```powershell
+# PowerShell：& 是呼叫運算子，不能省
 $tool = "F:\opencode-skills\skills\aft-bash-inspector\scripts\aft-bash.ps1"
+& $tool list
+& $tool show <taskId> -Tail 40
+& $tool watch <taskId>
 
-& $tool list                        # 目前執行中的工作
-& $tool show <taskId> -Tail 40      # 快照：metadata＋程序樹＋輸出尾巴
-& $tool watch <taskId>              # 跟隨新的 stdout／stderr 直到工作結束
+# 或直接給路徑
+& "F:\opencode-skills\skills\aft-bash-inspector\scripts\aft-bash.ps1" list
+
+# 從 cmd.exe（不需要寫 PowerShell 語法）
+"F:\opencode-skills\skills\aft-bash-inspector\scripts\aft-bash.cmd" list
 ```
 
 `<taskId>` 可用唯一前綴（例如 `bash-f16f`）；不確定就先跑 `list`。
+
+### 常見語法錯誤
+
+| 寫法 | 結果 | 正確寫法 |
+| --- | --- | --- |
+| `$tool list` | `ParserError`：`$tool` 後面不能直接接裸字 | `& $tool list` |
+| `& tool list` | `tool` 不是命令（少了 `$`） | `& $tool list` |
+| `tool list` | cmd 找不到 `tool` | `.cmd` 包裝或 `& $tool list` |
+| 在 cmd 裡 `$tool = ...` | cmd 不認得 PowerShell 變數 | 直接用 `.cmd` 包裝 |
+
+`& $tool list` 的意思是「把 `$tool` 這個字串當成程式路徑來執行，並傳 `list` 當第一個參數」。`$tool list` 會被 PowerShell 當成兩個相鄰的運算式，所以語法錯誤。
 
 ## 它從哪裡讀資料
 
@@ -34,6 +51,7 @@ AFT 會把每個工作寫在：
 └─ io\exit                 # 完成後才有退出碼
 ```
 
+所以它不是「連上那個 bash 程序」或開 socket，而是**讀 AFT 已經寫好的任務檔案**：`list` 掃 task 目錄、用 `io\exit` 快速跳過已完成者；`show` 讀 metadata 並用 `Win32_Process` 畫程序樹；`watch` 記住檔案目前長度，之後只讀新增的位元組。
 若設定了 `AFT_STORAGE_DIR`，腳本也會掃該位置。目錄存在不代表還在跑，**以 `metadata.json` 的 `status` 為準**（`running`／`completed`／`killed`）。
 
 ## 模式
