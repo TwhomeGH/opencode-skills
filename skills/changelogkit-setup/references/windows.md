@@ -42,6 +42,6 @@ python -m changelogkit --locale zh-TW export _site --branch main
 - `--locale` 是**全域旗標，必須放在子命令前**；放在 `export` 之後會被 argparse 拒絕。
 - 驗證實際使用的是哪個版本：比較 `--version` 與 `CHANGELOGKIT_SRC` 的 `pyproject.toml`，不要假設 PATH 上的版本等於原始碼版本。
 
-## 清理與暫存
+## 靜態站輸出位置
 
-`export` 會在目標 repo 產生 `_site/`（或指定目錄）。驗證完可自行刪除，但 `_site/` 應先進 `.gitignore`，避免誤提交。
+`export` 預設在目標 repo 產生 `_site/`。**先把 `_site/` 加進 `.gitignore` 再匯出**，避免誤提交；若不想在 repo 留下產物，可輸出到 repo 外的暫存目錄（例如 `%TEMP%\changelog-site`），兩者都算通過，但回報要寫清楚落點。

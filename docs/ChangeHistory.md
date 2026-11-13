@@ -1,5 +1,28 @@
 # ChangeHistory
 
+## 2026.11.13 15:20 以端到端測試修正 changelogkit-setup 的驗證判準
+
+**類型**: 修正 · **檔案**: `skills/changelogkit-setup/SKILL.md`、`assets/ChangeHistory.md.tpl`、`references/windows.md`
+
+### 問題 - 首版技能只驗證了模板，照文件實際執行會卡住
+
+獨立 agent 依 SKILL.md 接入測試 repo 時發現 10 項問題；其中 `<title>` 驗證判準永遠不可能通過（`title` 只出現在 `<h1>`），歷史檔骨架也缺少解析規則。
+
+### 根因 - 用「模板能跑」代替「流程能跑」
+
+模板（`.changelog.toml`／Pages YAML）確實實測過，但技能本體的步驟、判準與分支處理沒有被執行；`<title>` 與 `title` 的關係憑印象寫入，未對照 `static_history.html`。
+
+### 修改 - 以第二輪端到端測試逐項驗證
+
+- 驗證判準改為首頁 `<h1>` 等於 `title`、`<title>` 以 `project` 開頭，並加「常見誤判」說明。
+- 新增 `assets/ChangeHistory.md.tpl`；寫明「任何 `## ` 行都會被解析成條目」與 0 筆只能回報骨架。
+- 分支判定補上「remote HEAD → 當前分支 → 詢問」三順位，並要求 `export --branch` 與 workflow 一致。
+- Pages 門檻加註 N/A；`_site` 落點統一（repo 內先 gitignore，或輸出 repo 外）。
+- 補上合併規則（保留既有值、要改先問）與 YAML 解析器說明。
+- 第二輪測試：`docs --check`、`list`、`export`、`<h1>`／`<title>`、待辦頁、workflow YAML、`git status` 全數通過。
+
+---
+
 ## 2026.11.13 14:45 新增 changelogkit-setup 技能（薄技能設計）
 
 **類型**: 新增 · **檔案**: `skills/changelogkit-setup/`、`README.md`

@@ -18,13 +18,23 @@ changelogkit 持續改版，旗標與設定欄位會變。技能若抄一份旗�
 
 - 每次接入都先解析工具來源，執行 `--help`，必要時讀該來源的 `Docs/usage.md`／`Docs/pages.md`。
 - 技能內只保留**跨版本穩定**的指令：`export`、`docs --check`、`--branch`、全域 `--locale` 的位置規則。
-- 發現原始碼與技能描述不一致時，**以原始碼為準**，並在回報中指出落差。
+- 原始碼文件若與本技能衝突（例如工具自身 repo 用 editable 安裝），**以本技能的模板為準**：
+  `Docs/pages.md` 描述的是 changelogkit 自己 repo 的流程，不是任意目標 repo 的建議做法。
+- 發現原始碼行為與技能描述不一致時，以原始碼為準，並在回報中指出落差。
 
 ## 步驟 0：確認目標 repo
 
-- 以 `git -C <path> rev-parse --show-toplevel` 取得 repo 根；確認預設分支（`origin/HEAD`，否則問使用者）。
+- 以 `git -C <path> rev-parse --show-toplevel` 取得 repo 根。
+- 判定分支，順序如下：
+  1. `git symbolic-ref --short refs/remotes/origin/HEAD`（有 remote 時）
+  2. 否則 `git branch --show-current`
+  3. detached HEAD 或結果為空才問使用者
+- **記下分支名**：`export --branch` 要用它，否則靜態站的 GitHub 連結會指向錯誤分支。
 - 檢查既有檔案：`.changelog.toml`、`Docs/ChangeHistory.md`（或既有 `CHANGELOG.md`）、`TODO.md`、`.github/workflows/pages.yml`、`.gitignore`。
-- 有既有設定時**預設合併、不覆寫**；先顯示差異再動手。
+- 有既有設定時**預設合併、不覆寫**：只補缺少的欄位，既有值（尤其 `title`）一律保留並在回報中列出。
+  要改既有值（例如舊標題已不適用）時先停下、顯示 diff 並詢問，不要自行決定。
+  `project` 未設定可留白（工具預設用 repo 目錄名），不必為了湊欄位而推論改寫。
+  合併完成後用 `git diff`（或等效的檔案差異）呈現變更內容。
 
 ## 步驟 1：解析 changelogkit 來源
 
@@ -54,18 +64,23 @@ Windows 的編碼與路徑細節見 `references/windows.md`。
 
 - `history`：預設 `Docs/ChangeHistory.md`。若 repo 已有 `CHANGELOG.md` 且使用者要單一來源，才指向它；
   changelogkit 格式（問題／根因／修改）與 Keep a Changelog 不同，混用前先說明。
-- `todo`：`TODO.md` 存在就指向它；不存在的處理見步驟 4。
+- `todo`：可省略（工具會自動找根目錄 `TODO.md`）。明確寫出只是讓意圖清楚；`TODO.md` 不存在時見步驟 4。
 - `exclude`：排除 vendor／建置產物，否則文件與符號索引會被第三方內容淹沒。判斷方法見 `references/vendor-noise.md`。
   排除後以文件數變化驗證（例如 180+ → 20 內）。
 - `docs.groups`：repo 的文件分組有意義時才加；`paths` 不得重疊，加完跑 `docs --check` 到無 ERROR
   （沒命中的 pattern 只是 WARN，代表該路徑要嘛刪掉、要嘛修正）。
+- 歷史檔本身也會進文件索引（通常落在「其他」）。這是預期行為；不想顯示就用 `docs.entries` 或接受它。
 - 不寫死使用者本機絕對路徑；repo 內的設定必須可移植。
 
 ## 步驟 3：變更歷史檔
 
-- 不存在才建立骨架（標題＋格式說明）。**不要捏造紀錄**。
+- 不存在才用 `assets/ChangeHistory.md.tpl` 建立骨架。**不要捏造紀錄**。
+- 解析規則（原始碼 `history.py`，跨版本大致穩定）：
+  - **任何以 `## ` 開頭的行都會被當成條目**，即使沒有日期。骨架說明文字不可用 `## `。
+  - 標題格式是 `## YYYY.MM.DD [HH:MM] 標題`；HTML 註解會被移除，但別在註解裡放 `## `。
+- 完成判準：檔案存在、`list` 能執行、筆數如實回報。**0 筆只能說「已建立骨架（0 筆）」**，不能說歷史已建立完成。
 - 要從 git log 回填，必須先取得明確同意；只寫能從 commit 證實的內容，日期用 commit 日期。
-- 完成後用 `list`／`show` 確認解析得到條目；空檔案不算完成。
+- 有條目後用 `list`／`show <編號>` 確認解析內容與顯示一致。
 
 ## 步驟 4：主 `TODO.md`
 
@@ -78,10 +93,10 @@ Windows 的編碼與路徑細節見 `references/windows.md`。
 
 先問使用者是否要；沒有 GitHub remote 就不提。要的話：
 
-- 複製 `assets/pages.yml.tpl`，把 `<BRANCH>` 換成實際分支。
+- 複製 `assets/pages.yml.tpl`，把 `<BRANCH>` 換成步驟 0 記下的實際分支。
 - 安裝步驟**每次解析最新 tag**，不釘死版本；需要可重現時用 repo 變數 `CHANGELOGKIT_REF` 覆寫。
 - `fetch-depth: 0` 必留（列 commits／diff 需要完整歷史）。
-- `_site/` 加入 `.gitignore`。
+- `export --branch` 必須等於 workflow 觸發分支。
 - 本機先跑一次 `export` 驗證，再交給 CI。
 - 提醒使用者手動設定：repo **Settings → Pages → Source = GitHub Actions**。
 
@@ -89,14 +104,21 @@ Windows 的編碼與路徑細節見 `references/windows.md`。
 
 | 檢查 | 通過條件 |
 | --- | --- |
-| `docs --check` | exit 0、無 ERROR（WARN 需逐項說明） |
-| `export <tmp>` | exit 0，`index.html` 的 `<title>` 與設定的 `title` 一致 |
-| 文件索引 | 文件數合理（vendor 已排除），不是 0 |
-| 待辦頁 | 有設定 `todo` 且 `TODO.md` 有項目時，`development/todo.html` 存在且解析到數量 |
-| workflow YAML | 可被 YAML 解析器載入 |
-| `git status` | 只有預期的新增／修改檔 |
+| `docs --check` | exit 0、無 ERROR；WARN 逐條說明（輸出格式為 `WARN  <訊息>`） |
+| 歷史檔 | 檔案存在；`list` 可執行；筆數如實回報（0 筆＝骨架） |
+| `export` | exit 0；首頁 `<h1>` 等於設定的 `title`；`<title>` 以 `project` 開頭 |
+| 文件索引 | 文件頁數與 `docs --check` 的文件數一致；vendor 已排除，不是 0 |
+| 待辦頁 | 有 `TODO.md` 項目時，`development/todo.html` 存在且解析到數量 |
+| workflow YAML | **有 Pages 才檢查**：用 YAML 解析器（例如 PyYAML）載入無語法錯誤；YAML 1.1 會把 `on:` 讀成 `True`，不影響判定；沒有 Pages 記為 N/A |
+| `git status` | 只有預期的新增／修改檔；`_site/` 不得出現（已 gitignore 或輸出到 repo 外） |
 
-回報要帶實際數字（文件數、頁數、tag），不要只說「已完成」。
+**常見誤判**：`<title>` 是「`project` · 頁面名稱」，不是 `title` 欄位；`title` 只出現在 `<h1>`。
+拿 `<title>` 比對 `title` 會永遠失敗。
+
+`export` 預設寫 repo 內 `_site/`：先把它加進 `.gitignore`。不想留產物就輸出到 repo 外的暫存目錄，
+兩種都算通過，但回報要說明實際落點。
+
+回報要帶實際數字（文件數、頁數、歷史筆數、tag），不要只說「已完成」。
 
 ## 明確不做
 
