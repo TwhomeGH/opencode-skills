@@ -71,7 +71,7 @@ Agent 的 `bash_status`／`bash_watch`／`bash_kill` 都要先知道 taskId；�
 ### 修改 - 以第二輪端到端測試逐項驗證
 
 - 驗證判準改為首頁 `<h1>` 等於 `title`、`<title>` 以 `project` 開頭，並加「常見誤判」說明。
-- 新增 `assets/ChangeHistory.md.tpl`；寫明「任何 `## ` 行都會被解析成條目」與 0 筆只能回報骨架。
+- 新增 `assets/ChangeHistory.md.tpl`；寫明「任何 `##` 行都會被解析成條目」與 0 筆只能回報骨架。
 - 分支判定補上「remote HEAD → 當前分支 → 詢問」三順位，並要求 `export --branch` 與 workflow 一致。
 - Pages 門檻加註 N/A；`_site` 落點統一（repo 內先 gitignore，或輸出 repo 外）。
 - 補上合併規則（保留既有值、要改先問）與 YAML 解析器說明。
