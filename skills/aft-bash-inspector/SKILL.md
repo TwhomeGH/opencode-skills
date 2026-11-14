@@ -12,19 +12,40 @@ Agent 端的 `bash_status`／`bash_watch`／`bash_kill` 都需要先有 `taskId`
 
 ## 快速使用
 
+載入 skill 時，harness 會提供這個 skill 的 base directory（「Base directory for this skill: …」）。**不要把它寫死**成某台機器的路徑。
+
 ```powershell
-# PowerShell：& 是呼叫運算子，不能省
-$tool = "F:\opencode-skills\skills\aft-bash-inspector\scripts\aft-bash.ps1"
+# 1) 填入 harness 在載入時提供的 base directory
+$skillDir = '<harness 提供的 base directory>'
+
+# 2) 沒有 base directory 時，才退回使用者設定的環境變數
+if (-not (Test-Path -LiteralPath $skillDir) -and $env:OPENCODE_SKILLS_ROOT) {
+    $skillDir = Join-Path $env:OPENCODE_SKILLS_ROOT 'skills\aft-bash-inspector'
+}
+
+$tool = Join-Path $skillDir 'scripts\aft-bash.ps1'
+if (-not (Test-Path -LiteralPath $tool)) {
+    Write-Error "找不到 $tool：skill 安裝不完整或路徑不明。請改用 bash_status（需要 taskId），或詢問使用者 skills 根目錄後再試一次。"
+    return
+}
+
 & $tool list
 & $tool show <taskId> -Tail 40
 & $tool watch <taskId>
-
-# 或直接給路徑
-& "F:\opencode-skills\skills\aft-bash-inspector\scripts\aft-bash.ps1" list
-
-# 從 cmd.exe（不需要寫 PowerShell 語法）
-"F:\opencode-skills\skills\aft-bash-inspector\scripts\aft-bash.cmd" list
 ```
+
+從 cmd.exe（不需要 PowerShell 語法）：
+
+```bat
+rem <skillDir> 同樣取 harness 提供的 base directory
+"<skillDir>\scripts\aft-bash.cmd" list
+```
+
+路徑解析順序（不要用全碟搜尋）：
+
+1. harness 提供的 base directory
+2. `OPENCODE_SKILLS_ROOT` + `skills\aft-bash-inspector`
+3. 都沒有 → 停用這個 skill 並回報缺少的路徑，改用 `bash_status`；必要時才問使用者 skills 根目錄
 
 `<taskId>` 可用唯一前綴（例如 `bash-f16f`）；不確定就先跑 `list`。
 

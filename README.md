@@ -26,6 +26,12 @@ opencode 技能集，用於改善 Kotlin Multiplatform 開發體驗。
 3. 引用外部資源用**官方 URL**，不要指向可能不存在的本地技能名。
 4. 每個技能在 `description` 自述觸發條件（因為它們是各自獨立被載入的）。
 5. 語言慣例等細節用 `references/<lang>.md` 拆分並**按需載入**，不要一次讀取全部。
+6. **不得寫死本機絕對路徑**：SKILL.md 不可出現 `C:\Users\...`、`F:\...`、`/Users/`、`/home/` 這類路徑。
+   - skill 自己的檔案：用 harness 載入時提供的 base directory
+   - 目標專案：用 cwd／`git rev-parse --show-toplevel` 偵測，或確認專案類型
+   - 需要可設定時：才用環境變數（例如 `OPENCODE_SKILLS_ROOT`）作第二順位
+   - 都找不到：停用該 skill 並回報缺少的路徑，改用內建工具；不要猜路徑或全碟搜尋，必要時才詢問使用者
+   - 以 `scripts/check-skill-paths.ps1` 驗證
 
 ## 安裝
 

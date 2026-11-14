@@ -1,5 +1,22 @@
 # ChangeHistory
 
+## 2026.11.15 00:14 技能移除寫死路徑，改由 base directory 與專案偵測解析
+
+**類型**: 修正 · **檔案**: `skills/aft-bash-inspector/SKILL.md`
+
+### 問題 - SKILL.md 寫死 F:\opencode-skills 與 C:\Users\Co 這類本機路徑，換機器或換使用者就失效
+
+### 根因 - 範例直接複製作者機器的安裝路徑，沒有區分「skill 自身資源」與「目標專案」
+
+### 修改 - aft-bash-inspector 改用 harness 提供的 base directory；缺少時退回 OPENCODE_SKILLS_ROOT，再沒有就停用並回報缺少的路徑
+
+- kotlin-multiplatform-workspace 改由 cwd／git root 偵測專案與 KMP 特徵，不再假設家目錄位置。
+- 新增 scripts/check-skill-paths.ps1，README 撰寫原則加入「不得寫死本機絕對路徑」。
+
+**相關文件**: README.md
+
+---
+
 ## 2026.11.13 16:35 aft-bash-inspector 加上 cmd 包裝並修正用法說明
 
 **類型**: 修正 · **檔案**: `skills/aft-bash-inspector/`
