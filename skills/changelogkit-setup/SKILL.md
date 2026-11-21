@@ -76,8 +76,9 @@ Windows 的編碼與路徑細節見 `references/windows.md`。
 
 - 不存在才用 `assets/ChangeHistory.md.tpl` 建立骨架。**不要捏造紀錄**。
 - 解析規則（原始碼 `history.py`，跨版本大致穩定）：
-  - **任何以 `## ` 開頭的行都會被當成條目**，即使沒有日期。骨架說明文字不可用 `## `。
-  - 標題格式是 `## YYYY.MM.DD [HH:MM] 標題`；HTML 註解會被移除，但別在註解裡放 `## `。
+  - 標題格式是 `## YYYY.MM.DD [HH:MM] 標題`。**有日期標題時，只有這種行是條目邊界**；內文的 `## ` 會留在同一筆，不應再被當成新紀錄。
+  - 內文子標題請用 `###`；完全沒有日期標題的舊檔才會 fallback 把所有 `## ` 當成條目，供 `backfill-dates` 補日期。
+  - HTML 註解會被移除，但別在註解裡放 `## `。
 - 完成判準：檔案存在、`list` 能執行、筆數如實回報。**0 筆只能說「已建立骨架（0 筆）」**，不能說歷史已建立完成。
 - 要從 git log 回填，必須先取得明確同意；只寫能從 commit 證實的內容，日期用 commit 日期。
 - 有條目後用 `list`／`show <編號>` 確認解析內容與顯示一致。
@@ -100,6 +101,16 @@ Windows 的編碼與路徑細節見 `references/windows.md`。
 - 本機先跑一次 `export` 驗證，再交給 CI。
 - 提醒使用者手動設定：repo **Settings → Pages → Source = GitHub Actions**。
 
+### 選配：外部 API 文件站
+
+repo 已有 Doxygen、Sphinx、Go doc、pdoc 等產生的 HTML 或外部 API 站時，可選擇接入；沒有設定就完全維持現狀。
+
+- 使用 `[[tool.changelog.api]]`，可同時設定多個站點；`html` 指向本機 HTML 目錄，`url` 指向外部站（二選一）。
+- `embed` 預設 `false`；靜態站預設只外連，要複製本機產物才設 `true`。多個站點會收成「API 文件」下拉。
+- `kind` 是選填的 adapter 提示，純掛載不需要；目前只有掛載，tagfile／`objects.inv` 的符號深連結尚未內建，實際欄位以來源 `Docs/usage.md` 為準。
+- **Doxygen 產物不可放在 export 輸出目錄內**（例如 `_site/api`），否則匯出前清理會刪掉它；請輸出到獨立目錄（例如 `build/doxygen/html`）。
+- 若 Pages 要 `embed`：先產生 API，再跑 `export`；CI 先 `mkdir -p` 輸出父目錄（舊版 Doxygen 不會自動建立巢狀目錄），最後確認 `_site/api-docs/<mount>/index.html`。
+
 ## 步驟 6：驗證門檻（沒過不得回報完成）
 
 | 檢查 | 通過條件 |
@@ -109,6 +120,7 @@ Windows 的編碼與路徑細節見 `references/windows.md`。
 | `export` | exit 0；首頁 `<h1>` 等於設定的 `title`；`<title>` 以 `project` 開頭 |
 | 文件索引 | 文件頁數與 `docs --check` 的文件數一致；vendor 已排除，不是 0 |
 | 待辦頁 | 有 `TODO.md` 項目時，`development/todo.html` 存在且解析到數量 |
+| API 文件站 | 有設定時，動態／靜態的 `/api-docs/<mount>/index.html` 可取得且導覽有入口；`url` 外部站只需確認連結；Doxygen 產物不得位於 export 輸出目錄內 |
 | workflow YAML | **有 Pages 才檢查**：用 YAML 解析器（例如 PyYAML）載入無語法錯誤；YAML 1.1 會把 `on:` 讀成 `True`，不影響判定；沒有 Pages 記為 N/A |
 | `git status` | 只有預期的新增／修改檔；`_site/` 不得出現（已 gitignore 或輸出到 repo 外） |
 
