@@ -6,7 +6,7 @@ description: >-
   rustdoc, godoc, KDoc, Javadoc, C# XML), inline comments that explain why,
   parameter/return documentation, and readable formatting (logical grouping, blank
   lines, no monolithic blocks). Also covers when to extract or split code into shared
-  modules. Triggers: 註釋, 可讀性, 參數說明, doc comment, JSDoc, Swift-DocC, docstring, modularize.
+  modules, and readable test descriptions and runner display names. Triggers: 註釋, 可讀性, 參數說明, doc comment, JSDoc, Swift-DocC, docstring, modularize.
 ---
 
 # Clean Code：註釋、可讀性與模塊化
@@ -18,7 +18,7 @@ description: >-
 - **套用**：專案的原始碼（`.swift`、`.kt`、`.ts`、`.py`、`.rs`、`.go`、`.cs` 等）。
 - **不套用**（除非使用者明確要求）：自動生成的程式碼、`vendor/`、`node_modules/`、minified 或 build 產物、一次性拋棄式腳本。
 - **既有風格優先**：先看鄰近檔案的慣例（註釋語言、縮排、doc 格式），沿用專案既有形式，不要用本技能的預設去覆蓋它。
-- **註釋語言**：沿用檔案既有語言；新檔案預設與專案主要註釋語言一致。
+- **註釋與測試說明語言**：優先依使用者明確偏好，其次專案／模組主要文件與註釋語言，再沿用鄰近檔案。主要使用中文時以中文描述，其他語言亦同；不要僅因程式語言或英文 API 名稱就改用英文。識別符沿用專案命名慣例，不為翻譯說明全面重新命名。
 
 ## 兩種註釋，規則不同
 
@@ -36,6 +36,15 @@ description: >-
 - 標記待辦：`TODO:`、`FIXME:`、`HACK:`、`NOTE:`，並寫明原因與解除條件。
 - **不要**：逐行翻譯程式碼、把已清楚的程式碼再講一遍、與程式碼脫節（改了程式卻沒改註釋）。
 - **反例警告**：過度註釋與缺乏註釋一樣傷害可讀性。每行都註釋＝噪音。
+
+## 單元測試：說明與執行名稱
+
+新增或修改測試時，讀取 [測試命名與報告](./references/testing.md)，並只查目前使用的框架。
+
+- 描述具體的「條件／操作 → 預期行為」，避免只有「測試成功」「正常情況」。函數名保持穩定、可搜尋。
+- 執行摘要優先呈現「測試內容 — Suite.函數名 [案例／參數]」；註釋、顯示名稱與測試識別是不同用途，不假設加註釋就會改變 runner 輸出。
+- 複雜測試註釋補充回歸背景、fixture 前提、時間／精度門檻原因及驗證邊界。名稱已說明的簡單行為不重複寫三份說明，也不為無參數測試硬填參數／回傳文件。
+- 沿用既有框架及 reporter；需要雙名稱時先確認實際輸出，再決定標題附函數名或調整摘要。不要為命名引入框架、全面改名或改掉篩選 ID。
 
 ## 語言分派表（doc comment 格式）
 
@@ -95,6 +104,7 @@ description: >-
 - [ ] 沒有可抽出的重複邏輯？抽出後舊碼已刪除？
 - [ ] 沿用專案既有風格與註釋語言？
 - [ ] 沒有對 trivial 程式碼過度註釋？
+- [ ] 本次涉及的測試可從執行結果辨認行為、來源及參數案例？尚未執行時有明確標示顯示效果未驗證？
 
 ## 官方參考
 

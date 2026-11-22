@@ -25,3 +25,23 @@ func add(_ a: Int, _ b: Int) throws -> Int
 ## 官方
 
 - [Swift-DocC](https://www.swift.org/documentation/docc/)
+
+## 單元測試的名稱與說明
+
+先辨識 Swift Testing 或 XCTest，兩者的命名機制不同。共通規則見 [測試命名與報告](./testing.md)。
+
+Swift Testing 的 `@Test` 第一個字串參數是顯示名稱，未指定時由函數名衍生；`///` 是原始碼說明，不會自動出現在測試清單。
+
+```swift
+// 片段：測試內容與 fixture 依專案補入。
+@Test("來源 PTS 無效時保持未知 — invalidPTSRemainUnknown")
+func invalidPTSRemainUnknown() throws {
+    // 在此建立明確無效的 PTS，驗證仍為未知且沒有套用到達時間。
+}
+```
+
+上例適用於 runner 只顯示標題、而專案要求「內容＋函數名」的情況。若 reporter 已另列函數 ID，標題僅保留「來源 PTS 無效時保持未知」即可；不要為同時顯示兩者而假設框架會自動附上函數名。
+
+參數化測試使用既有 `@Test("描述", arguments: …)` 形式，摘要保留各案例參數，不能只列同一標題後去重。需要註釋時說明回歸原因或 fixture 前提，不重複標題。XCTest 維持 `test…` 方法命名與必要說明，不套用 `@Test`。
+
+- [Swift Testing 定義測試與自訂名稱](https://docs.swift.org/latest/documentation/testing/definingtests/)
