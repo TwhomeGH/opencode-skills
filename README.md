@@ -12,6 +12,7 @@ opencode 技能集，用於改善 Kotlin Multiplatform 開發體驗。
 | **clean-code** | 撰寫 / 修改原始碼時的註釋、可讀性與模塊化準則。文件註釋依語言格式（Swift-DocC、JSDoc、docstring、PowerShell comment-based help…），並含未列入語言的查找流程 |
 | **windows-script-pitfalls** | Windows 腳本與編碼地雷。UTF-8/ANSI（cp950）編碼、BOM 需求、chcp、PowerShell 執行原則、引號轉義，以及 Python locale/.pth 陷阱 |
 | **safe-file-cleanup** | 準備刪除 / 清理本機檔案或資料夾時使用。依 Windows / macOS / Linux 送入系統回收站；無回收站時先確認永久刪除範圍 |
+| **git-worktree-safety** | Git worktree 生命週期與清理。預設送回收站、再 `git worktree prune`；稽核教學與腳本中的 `worktree remove`／`--force`／`rm -rf` 等直接刪除行為 |
 | **file-fix** | 寫入文件遇到問題時使用。退回指導使用者替換指定段落並說明前後差異，避免只為改檔而新建臨時腳本 |
 | **swift-test** | Swift 測試。非 macOS 環境預設跳過；已安裝 Swift 編譯器時可編譯檢查與執行 `swift test` |
 | **changelogkit-setup** | 在任一新專案接入 changelogkit（設定、變更歷史、主待辦、Pages 靜態站）。旗標一律向來源的 `--help`／`Docs/` 查，避免版本漂移 |
