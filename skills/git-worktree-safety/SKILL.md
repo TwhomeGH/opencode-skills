@@ -120,6 +120,32 @@ git branch <branch> <sha>
 
 只有在「內容已確認不需要、也不需要可還原」時才用 `git worktree remove --force`。教學與日常開發應使用回收站流程。
 
+## 移動後用 repair，不要 prune
+
+目錄還在、只是換路徑時，從主 repo 執行：
+
+```powershell
+git worktree repair <new-path>
+git worktree list
+git -C <new-path> status --short
+```
+
+`repair` 可能印出 `gitdir incorrect`，但 exit code 0 代表已修正；用 `git worktree list` 與 `status` 驗證。`prune` 只適用於目錄已刪除／已回收的情況。
+
+## 查證來源
+
+先查 Git 本身，再查線上文件：
+
+```powershell
+git worktree -h
+git help worktree
+git worktree repair -h
+```
+
+官方文件：https://git-scm.com/docs/git-worktree
+
+Git for Windows 的本機 HTML 文件通常在 `%ProgramFiles%\Git\mingw64\share\doc\git-doc\git-worktree.html`；請用 `$env:ProgramFiles` 取得實際位置，不要假設固定磁碟機。Linux／macOS 可用 `man git-worktree`。若專案文件與官方行為衝突，以官方文件與實際 `git` 輸出為準。
+
 ## 剛 checkout 也可能顯示 modified
 
 Windows 的 CRLF／BOM 可能讓新 worktree 出現只差行尾的 modified：
