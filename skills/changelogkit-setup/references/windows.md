@@ -22,7 +22,7 @@ pip show changelogkit
 where.exe changelogkit
 ```
 
-- `changelogkit` 可執行就是已安裝，不需要 `F:\ChangeLogTools` 或其他固定 checkout。
+- `changelogkit` 可執行就是已安裝，不需要任何固定 checkout 路徑。
 - `python -m changelogkit` 失敗可能只是 `python` 指向另一個直譯器（例如 3.10，而套件在 3.11）。
 - 用 `Get-Command changelogkit`／`where.exe`／`pip show` 找到實際環境，不要混用兩份安裝。
 - Windows Store Python 的套件可能在

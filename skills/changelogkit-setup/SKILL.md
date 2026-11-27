@@ -69,7 +69,7 @@ changelogkit 持續改版，旗標與設定欄位會變。技能若抄一份旗�
    不一定在 `%LOCALAPPDATA%\Programs\Python` 底下。
 4. **詢問使用者是否已有本地原始碼、路徑在哪**；不要假設固定磁碟或路徑（例如某個磁碟上的
    `ChangeLogTools`）。可以從 `CHANGELOGKIT_SRC`、使用者指定路徑或 `git` 查詢取得；
-   不要用 `D:\`／`F:\` 逐一搜尋猜測。
+   不要逐一搜尋整個磁碟猜測。
    若同時有安裝版與原始碼，選擇一個明確來源並在回報中寫出實際版本，不要靜默混用。
 5. 都沒有才安裝：解析最新 tag 後 `pip install "git+https://github.com/TwhomeGH/ChangeLogKit.git@<tag>"`
    （**不要** `pip install -e`，也不要釘死舊版）。
@@ -196,7 +196,7 @@ repo 已有 Doxygen、Sphinx、Go doc、pdoc 等產生的 HTML 或外部 API 站
 - 不自動產生 `Docs/community.md`（工具刻意維持唯讀，需明示 `community-init`）。
 - 不在中文路徑做 `pip install -e`（會產生含非 ASCII 的 `.pth`，cp950 下 Python 直接起不來）。
 - 不假設 repo 一定有 Pages，也不把 Pages 當成接入的必要條件。
-- 不把「`F:\ChangeLogTools` 或其他固定原始碼路徑不存在」當成「changelogkit 未安裝」；
+- 不把「某個固定原始碼路徑不存在」當成「changelogkit 未安裝」；
   先查 Python 環境的 `python -m changelogkit`。
 - 不因 repo 沒有 Pages workflow 就說「沒有站台產生流程」；本機 `export` 與 GitHub Pages
   是不同層次，前者不需要 workflow。
