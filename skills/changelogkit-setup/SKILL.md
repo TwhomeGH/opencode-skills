@@ -31,7 +31,19 @@ changelogkit 持續改版，旗標與設定欄位會變。技能若抄一份旗�
   2. 否則 `git branch --show-current`
   3. detached HEAD 或結果為空才問使用者
 - **記下分支名**：`export --branch` 要用它，否則靜態站的 GitHub 連結會指向錯誤分支。
-- 檢查既有檔案：`.changelog.toml`、`Docs/ChangeHistory.md`（或既有 `CHANGELOG.md`）、`TODO.md`、`.github/workflows/pages.yml`、`.gitignore`。
+- 檢查既有檔案：`.changelog.toml`、`Docs/ChangeHistory.md`（或既有 `CHANGELOG.md`）、`TODO.md`、`.github/workflows/pages.yml`、`.gitignore`、首頁／`site/index.html`。
+- **先探測目前狀態，再決定要不要改**：
+
+  ```powershell
+  git -C <repo> status --short
+  git -C <repo> log -1 --oneline
+  Select-String -Path <repo>\.github\workflows\pages.yml -Pattern 'changelogkit|setup-python|export|changelog'
+  ```
+
+  - 目標檔案已有未提交變更、或已被其他 session 修改時，**重新讀取目前內容**再做最小修改；不要用先前讀到的舊內容做字串替換。
+  - 若 workflow 已經有 `changelogkit` 安裝、Python setup 或 changelog export，**只補缺少的部分**；不要新增第二個同名或同功能 step。
+  - 若 `site/index.html` 已有 `changelog/` 連結、`.gitignore` 已有 `/site/changelog/`、`.changelog.toml` 已有 `project`，直接視為已接入，不要重複加。
+  - 已經整合完成且 `git status` 乾淨時，先回報現況與版本，不要重跑一次接入。
 - 有既有設定時**預設合併、不覆寫**：只補缺少的欄位，既有值（尤其 `title`）一律保留並在回報中列出。
   要改既有值（例如舊標題已不適用）時先停下、顯示 diff 並詢問，不要自行決定。
   `project` 未設定可留白（工具預設用 repo 目錄名），不必為了湊欄位而推論改寫。
@@ -148,13 +160,18 @@ Windows 的編碼與路徑細節見 `references/windows.md`。
 
 先問使用者是否要；沒有 GitHub remote 就不提。要的話：
 
-- 複製 `assets/pages.yml.tpl`，把 `<BRANCH>` 換成步驟 0 記下的實際分支。
+- **先讀目前 workflow**，不要直接複製模板覆蓋。既有 `.github/workflows/pages.yml` 只在缺少時補步驟：
+  - 已有 `changelogkit` 安裝、Python setup 或 changelog export → 不要加第二份。
+  - 已有自製首頁 → 匯出到子目錄（例如 `site/changelog/`），不要覆蓋首頁。
+  - 若 workflow 曾被其他 session 修改，先 `git log -1`／重新讀檔，再基於目前內容修改。
+- 只有「全新、沒有 Pages workflow」的 repo 才複製 `assets/pages.yml.tpl`，把 `<BRANCH>` 換成步驟 0 記下的實際分支。
 - 安裝步驟**每次解析最新 tag**，不釘死版本；需要可重現時用 repo 變數 `CHANGELOGKIT_REF` 覆寫。
 - `fetch-depth: 0` 必留（列 commits／diff 需要完整歷史）。
 - `export --branch` 必須等於 workflow 觸發分支。
 - 若使用 Workflow 健康檢查的 runtime 查詢，export step 要設 `GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}`；Actions 不會自動提供這個環境變數，**也不要放進 `.changelog.toml`**。
 - 本機先跑一次 `export` 驗證，再交給 CI。
 - 提醒使用者手動設定：repo **Settings → Pages → Source = GitHub Actions**。
+- **修改後先檢查 YAML 結構**：step 名稱不得重複；`with:` 只能掛在 `uses:` action step，不能掛在 `run:` step；再解析一次 YAML。CI 失敗時先讀失敗 run 的目前 workflow，不要用舊內容重貼步驟。
 
 ### 選配：外部 API 文件站
 
@@ -180,6 +197,8 @@ repo 已有 Doxygen、Sphinx、Go doc、pdoc 等產生的 HTML 或外部 API 站
 | 待辦頁 | 有 `TODO.md` 項目時，`development/todo.html` 存在且解析到數量 |
 | API 文件站 | 有設定時，動態／靜態的 `/api-docs/<mount>/index.html` 可取得且導覽有入口；`url` 外部站只需確認連結；Doxygen 產物不得位於 export 輸出目錄內 |
 | workflow YAML | **有 Pages 才檢查**：用 YAML 解析器（例如 PyYAML）載入無語法錯誤；YAML 1.1 會把 `on:` 讀成 `True`，不影響判定；沒有 Pages 記為 N/A |
+| workflow 結構 | step 名稱唯一；沒有重複的 setup／install／export；`with:` 只出現在 `uses:` action step，不可掛在 `run:` step |
+| 接入狀態 | 只補缺少步驟；既有 `changelogkit` 安裝／匯出／首頁連結／`.gitignore`／`project` 不重複加，回報前先讀目前檔案 |
 | `git status` | 只有預期的新增／修改檔；`_site/` 不得出現（已 gitignore 或輸出到 repo 外） |
 
 **常見誤判**：`<title>` 是「`project` · 頁面名稱」，不是 `title` 欄位；`title` 只出現在 `<h1>`。
@@ -200,6 +219,8 @@ repo 已有 Doxygen、Sphinx、Go doc、pdoc 等產生的 HTML 或外部 API 站
   先查 Python 環境的 `python -m changelogkit`。
 - 不因 repo 沒有 Pages workflow 就說「沒有站台產生流程」；本機 `export` 與 GitHub Pages
   是不同層次，前者不需要 workflow。
+- 不用舊的檔案內容做字串替換；每次修改前重讀目前檔案，避免把已存在的步驟再加一次。
+- 不在同一個 workflow 放第二個 setup／install／export；若已存在，只補缺少欄位並回報。
 
 ## 官方參考
 
