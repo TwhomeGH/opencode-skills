@@ -45,6 +45,9 @@ jobs:
           python -m pip install "git+https://github.com/TwhomeGH/ChangeLogKit.git@$ref"
 
       - name: Export static site
+        env:
+          # GITHUB_TOKEN 不是 Actions 預設環境變數；Workflow 健康檢查需要它。
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: changelogkit --locale zh-TW export _site --branch <BRANCH>
 
       - name: Configure Pages

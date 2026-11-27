@@ -114,6 +114,7 @@ Windows 的編碼與路徑細節見 `references/windows.md`。
 - 安裝步驟**每次解析最新 tag**，不釘死版本；需要可重現時用 repo 變數 `CHANGELOGKIT_REF` 覆寫。
 - `fetch-depth: 0` 必留（列 commits／diff 需要完整歷史）。
 - `export --branch` 必須等於 workflow 觸發分支。
+- 若使用 Workflow 健康檢查的 runtime 查詢，export step 要設 `GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}`；Actions 不會自動提供這個環境變數，**也不要放進 `.changelog.toml`**。
 - 本機先跑一次 `export` 驗證，再交給 CI。
 - 提醒使用者手動設定：repo **Settings → Pages → Source = GitHub Actions**。
 
