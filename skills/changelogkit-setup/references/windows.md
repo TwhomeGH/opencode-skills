@@ -19,13 +19,19 @@ py -0p
 py -3.11 -m changelogkit --version
 python -m changelogkit --version
 pip show changelogkit
+where.exe changelogkit
 ```
 
 - `changelogkit` 可執行就是已安裝，不需要 `F:\ChangeLogTools` 或其他固定 checkout。
 - `python -m changelogkit` 失敗可能只是 `python` 指向另一個直譯器（例如 3.10，而套件在 3.11）。
-- 用 `Get-Command changelogkit`／`pip show` 找到實際環境，不要混用兩份安裝。
-- 已安裝套件可能沒有 `Docs/`；用 `--help` 與 `capabilities` 查現有功能。
-- 只有明確要驗證本地原始碼時，才設定 `CHANGELOGKIT_SRC` 或 `PYTHONPATH`。
+- 用 `Get-Command changelogkit`／`where.exe`／`pip show` 找到實際環境，不要混用兩份安裝。
+- Windows Store Python 的套件可能在
+  `%LOCALAPPDATA%\Packages\PythonSoftwareFoundation.Python.*\LocalCache\local-packages`，
+  不一定在 `%LOCALAPPDATA%\Programs\Python`。
+- **0.14.2+** 的 wheel 隨附 `changelogkit/docs/usage.md`、`pages.md`；舊版沒有時用
+  `--help` 與 `capabilities`，不要要求使用者先拉原 repo。
+- 只有明確要驗證本地原始碼時，才設定 `CHANGELOGKIT_SRC` 或 `PYTHONPATH`；不要假設
+  原始碼在某個固定磁碟（`C:`／`D:`／`F:`）。
 
 ## 不要對含非 ASCII 的路徑做 editable 安裝
 
@@ -53,18 +59,18 @@ $env:PYTHONUTF8 = "1"
 ```powershell
 # 已安裝套件（常態；不需要 PYTHONPATH）
 $env:PYTHONUTF8 = "1"
-cd C:\path\to\target-repo
+cd <target-repo>
 
 changelogkit --version
 changelogkit --help
-changelogkit --locale zh-TW export _site --branch main
+changelogkit --locale zh-TW export <output-dir> --branch <branch>
 
 # 若 PATH 沒有 changelogkit，先找實際 Python 環境
 py -0p
 py -3.11 -m changelogkit --version
 
-# 本地原始碼（只有要驗證 checkout 時）
-$env:PYTHONPATH = "C:\path\to\ChangeLogTools\src"
+# 本地原始碼（只有要驗證 checkout 時；路徑由 CHANGELOGKIT_SRC 或使用者提供）
+$env:PYTHONPATH = "<changelogkit-root>\src"
 python -m changelogkit --version
 ```
 

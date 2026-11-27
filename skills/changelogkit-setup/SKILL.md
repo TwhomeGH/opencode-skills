@@ -58,12 +58,18 @@ changelogkit 持續改版，旗標與設定欄位會變。技能若抄一份旗�
    py -3.11 -m changelogkit --version
    python -m changelogkit --version
    pip show changelogkit
+   where.exe changelogkit
    ```
 
    `python` 可能不是安裝套件的那個直譯器（例如 `python` 是 3.10、套件裝在 3.11）；
-   `python -m changelogkit` 失敗不代表沒有安裝。用 `Get-Command changelogkit` 找到
-   console script 後，改用同一個 Python 環境；不要混用兩份安裝。
-4. **詢問使用者是否已有本地原始碼、路徑在哪**；不要假設固定路徑（例如 `F:\ChangeLogTools`）。
+   `python -m changelogkit` 失敗不代表沒有安裝。用 `Get-Command changelogkit`／
+   `where.exe changelogkit` 找到 console script 後，改用同一個 Python 環境；不要混用兩份安裝。
+   Windows Store Python 的套件可能在
+   `%LOCALAPPDATA%\Packages\PythonSoftwareFoundation.Python.*\LocalCache\local-packages`，
+   不一定在 `%LOCALAPPDATA%\Programs\Python` 底下。
+4. **詢問使用者是否已有本地原始碼、路徑在哪**；不要假設固定磁碟或路徑（例如某個磁碟上的
+   `ChangeLogTools`）。可以從 `CHANGELOGKIT_SRC`、使用者指定路徑或 `git` 查詢取得；
+   不要用 `D:\`／`F:\` 逐一搜尋猜測。
    若同時有安裝版與原始碼，選擇一個明確來源並在回報中寫出實際版本，不要靜默混用。
 5. 都沒有才安裝：解析最新 tag 後 `pip install "git+https://github.com/TwhomeGH/ChangeLogKit.git@<tag>"`
    （**不要** `pip install -e`，也不要釘死舊版）。
@@ -79,9 +85,16 @@ python -m changelogkit capabilities --json
 ```
 
 使用已安裝套件時不需要 `PYTHONPATH`，用 `changelogkit` 或「實際安裝該套件的 Python」
-執行 `-m changelogkit`；套件可能沒有附帶 `Docs/usage.md`／`Docs/pages.md`，不要因此判定
-安裝無效，改用 `--help` 與 `capabilities` 查。本地原始碼才讀 `<root>/Docs/usage.md`、
-`Docs/pages.md`。
+執行 `-m changelogkit`。**0.14.2 以後的 wheel 隨附** `changelogkit/docs/usage.md` 與
+`changelogkit/docs/pages.md`，可用安裝該套件的 Python 找路徑：
+
+```powershell
+python -c "import changelogkit, pathlib; print(pathlib.Path(changelogkit.__file__).parent / 'docs' / 'usage.md')"
+```
+
+舊版 wheel 或找不到 `docs/` 時，不要因此判定安裝無效，改用 `--help` 與
+`capabilities` 查；不要要求使用者先拉原 repo 才有文件。本地原始碼才讀
+`<root>/Docs/usage.md`、`Docs/pages.md`。
 Windows 的編碼與路徑細節見 `references/windows.md`。
 
 ### 能力探測（必做）
@@ -157,7 +170,8 @@ repo 已有 Doxygen、Sphinx、Go doc、pdoc 等產生的 HTML 或外部 API 站
 
 | 檢查 | 通過條件 |
 | --- | --- |
-| 安裝狀態 | 先用 `python -m changelogkit --version` 確認；原始碼資料夾不存在不等於未安裝 |
+| 安裝狀態 | 先用 `changelogkit --version`／正確 Python 的 `-m changelogkit --version` 確認；原始碼資料夾不存在不等於未安裝 |
+| 文件來源 | 0.14.2+ 的 wheel 有 `changelogkit/docs/`；舊版改用 `--help`／`capabilities`，不得要求先拉原 repo |
 | `capabilities --json` | **0.13.3+** 才檢查：可解析 JSON；`version` 與 `--version` 一致；需要的功能 `id` 存在（不存在時已查 --help／Docs）。舊版沒有此指令時記為 fallback，不得假設能力 |
 | `docs --check` | exit 0、無 ERROR；WARN 逐條說明（輸出格式為 `WARN  <訊息>`） |
 | 歷史檔 | 檔案存在；`list` 可執行；筆數如實回報（0 筆＝骨架） |
