@@ -2,8 +2,9 @@
 name: changelogkit-setup
 description: >-
   在任一 repo 接入 changelogkit（`.changelog.toml`、變更歷史 `Docs/ChangeHistory.md`、主 `TODO.md`、
-  GitHub Pages 唯讀靜態站），或重新驗證既有接入時使用。會先確認本機是否已有 changelogkit 原始碼，
-  再從該來源的 `--help`／`Docs/` 查當前指令與旗標，不依賴技能內寫死的版本資訊。
+  GitHub Pages 唯讀靜態站），或重新驗證既有接入時使用。會先確認 Python 環境是否已安裝 changelogkit，
+  或是否指定本地原始碼，再從實際來源的 `--help`／`capabilities`／`Docs/` 查當前指令與旗標，
+  不依賴技能內寫死的版本資訊。
   Triggers: changelogkit, 接入變更歷史, ChangeHistory, Pages 靜態站, changelog 設定, 變更紀錄.
 ---
 
@@ -40,13 +41,34 @@ changelogkit 持續改版，旗標與設定欄位會變。技能若抄一份旗�
 
 依序嘗試，找到就停：
 
-1. 環境變數 `CHANGELOGKIT_SRC`（指向 changelogkit repo 根目錄）。
-2. **詢問使用者是否已有本地原始碼、路徑在哪**（這是常態：接入時通常已持有）。
-3. PATH 上的 `changelogkit` 指令。
-4. 都沒有才安裝：解析最新 tag 後 `pip install "git+https://github.com/TwhomeGH/ChangeLogKit.git@<tag>"`
+1. 環境變數 `CHANGELOGKIT_SRC`（指向 changelogkit repo 根目錄；只有在明確要驗證本地原始碼時使用）。
+2. **已安裝的 console script（先試這個）**：
+
+   ```powershell
+   changelogkit --version
+   changelogkit capabilities --json
+   ```
+
+   可執行且版本符合需求就使用；這通常就是使用者已安裝在 Python 環境的版本。
+
+3. **其他 Python 環境**：若 PATH 沒有 `changelogkit`，不要直接判定未安裝，依序檢查：
+
+   ```powershell
+   py -0p
+   py -3.11 -m changelogkit --version
+   python -m changelogkit --version
+   pip show changelogkit
+   ```
+
+   `python` 可能不是安裝套件的那個直譯器（例如 `python` 是 3.10、套件裝在 3.11）；
+   `python -m changelogkit` 失敗不代表沒有安裝。用 `Get-Command changelogkit` 找到
+   console script 後，改用同一個 Python 環境；不要混用兩份安裝。
+4. **詢問使用者是否已有本地原始碼、路徑在哪**；不要假設固定路徑（例如 `F:\ChangeLogTools`）。
+   若同時有安裝版與原始碼，選擇一個明確來源並在回報中寫出實際版本，不要靜默混用。
+5. 都沒有才安裝：解析最新 tag 後 `pip install "git+https://github.com/TwhomeGH/ChangeLogKit.git@<tag>"`
    （**不要** `pip install -e`，也不要釘死舊版）。
 
-判定有效來源：`<root>/src/changelogkit/cli.py` 存在。使用本地原始碼時：
+使用本地原始碼時，判定有效來源：`<root>/src/changelogkit/cli.py` 存在，並用：
 
 ```powershell
 $env:PYTHONPATH = "<changelogkit-root>\src"
@@ -56,7 +78,10 @@ python -m changelogkit --help
 python -m changelogkit capabilities --json
 ```
 
-同時讀取 `<root>/Docs/usage.md`、`Docs/pages.md`，確認當前欄位與靜態站行為。
+使用已安裝套件時不需要 `PYTHONPATH`，用 `changelogkit` 或「實際安裝該套件的 Python」
+執行 `-m changelogkit`；套件可能沒有附帶 `Docs/usage.md`／`Docs/pages.md`，不要因此判定
+安裝無效，改用 `--help` 與 `capabilities` 查。本地原始碼才讀 `<root>/Docs/usage.md`、
+`Docs/pages.md`。
 Windows 的編碼與路徑細節見 `references/windows.md`。
 
 ### 能力探測（必做）
@@ -132,6 +157,7 @@ repo 已有 Doxygen、Sphinx、Go doc、pdoc 等產生的 HTML 或外部 API 站
 
 | 檢查 | 通過條件 |
 | --- | --- |
+| 安裝狀態 | 先用 `python -m changelogkit --version` 確認；原始碼資料夾不存在不等於未安裝 |
 | `capabilities --json` | **0.13.3+** 才檢查：可解析 JSON；`version` 與 `--version` 一致；需要的功能 `id` 存在（不存在時已查 --help／Docs）。舊版沒有此指令時記為 fallback，不得假設能力 |
 | `docs --check` | exit 0、無 ERROR；WARN 逐條說明（輸出格式為 `WARN  <訊息>`） |
 | 歷史檔 | 檔案存在；`list` 可執行；筆數如實回報（0 筆＝骨架） |
@@ -156,6 +182,10 @@ repo 已有 Doxygen、Sphinx、Go doc、pdoc 等產生的 HTML 或外部 API 站
 - 不自動產生 `Docs/community.md`（工具刻意維持唯讀，需明示 `community-init`）。
 - 不在中文路徑做 `pip install -e`（會產生含非 ASCII 的 `.pth`，cp950 下 Python 直接起不來）。
 - 不假設 repo 一定有 Pages，也不把 Pages 當成接入的必要條件。
+- 不把「`F:\ChangeLogTools` 或其他固定原始碼路徑不存在」當成「changelogkit 未安裝」；
+  先查 Python 環境的 `python -m changelogkit`。
+- 不因 repo 沒有 Pages workflow 就說「沒有站台產生流程」；本機 `export` 與 GitHub Pages
+  是不同層次，前者不需要 workflow。
 
 ## 官方參考
 

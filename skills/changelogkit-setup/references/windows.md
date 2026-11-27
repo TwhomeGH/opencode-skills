@@ -1,6 +1,31 @@
-# Windows：編碼與本地原始碼
+# Windows：編碼、已安裝套件與本地原始碼
 
 在 Windows（繁中系統常見 cp950）使用 changelogkit 時的地雷與正確指令。這些問題與 changelogkit 版本無關，屬環境層。
+
+## 先確認 Python 環境，不要先找原始碼
+
+「找不到原始碼資料夾」不等於「沒有安裝」。changelogkit 通常安裝在 Python 的
+site-packages，先找可執行的 console script：
+
+```powershell
+changelogkit --version
+changelogkit capabilities --json
+```
+
+若 PATH 上沒有，再找正確的 Python 環境：
+
+```powershell
+py -0p
+py -3.11 -m changelogkit --version
+python -m changelogkit --version
+pip show changelogkit
+```
+
+- `changelogkit` 可執行就是已安裝，不需要 `F:\ChangeLogTools` 或其他固定 checkout。
+- `python -m changelogkit` 失敗可能只是 `python` 指向另一個直譯器（例如 3.10，而套件在 3.11）。
+- 用 `Get-Command changelogkit`／`pip show` 找到實際環境，不要混用兩份安裝。
+- 已安裝套件可能沒有 `Docs/`；用 `--help` 與 `capabilities` 查現有功能。
+- 只有明確要驗證本地原始碼時，才設定 `CHANGELOGKIT_SRC` 或 `PYTHONPATH`。
 
 ## 不要對含非 ASCII 的路徑做 editable 安裝
 
@@ -26,14 +51,21 @@ $env:PYTHONUTF8 = "1"
 ## PowerShell 指令範本
 
 ```powershell
-# 本地原始碼
-$env:PYTHONPATH = "C:\path\to\ChangeLogTools\src"
+# 已安裝套件（常態；不需要 PYTHONPATH）
 $env:PYTHONUTF8 = "1"
 cd C:\path\to\target-repo
 
+changelogkit --version
+changelogkit --help
+changelogkit --locale zh-TW export _site --branch main
+
+# 若 PATH 沒有 changelogkit，先找實際 Python 環境
+py -0p
+py -3.11 -m changelogkit --version
+
+# 本地原始碼（只有要驗證 checkout 時）
+$env:PYTHONPATH = "C:\path\to\ChangeLogTools\src"
 python -m changelogkit --version
-python -m changelogkit --help
-python -m changelogkit --locale zh-TW export _site --branch main
 ```
 
 注意：
