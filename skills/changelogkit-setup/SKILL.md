@@ -67,8 +67,10 @@ Windows 的編碼與路徑細節見 `references/windows.md`。
 - 技能要使用某功能（例如 LAN、API 文件、TODO 自動偵測）前，先確認對應 `id` 存在。
 - 找不到對應 `id` 時，**不要假設支援、也不要自行發明設定**；依序檢查
   `--help`、`Docs/usage.md`、`Docs/pages.md` 與原始碼。
-- 舊版沒有 `capabilities` 指令時，視為只能靠 `--help`／Docs 判斷；必要時安裝最新 tag，
-  並告知使用者實際版本與缺少的能力。
+- `capabilities` 自 **0.13.3** 起提供。若 `--version` 小於 0.13.3，或指令回
+  `unknown command`，表示這個安裝沒有這份清單：不要用其他版本的 `features` 推論，
+  改用 `--help`、`Docs/usage.md`、`Docs/pages.md` 與原始碼判斷，並告知使用者實際版本與限制。
+  必要時才安裝最新 tag。
 
 清單是人工維護的；如果某個新功能不在清單中，應以目前原始碼與 `--help` 為準，並在回報中指出清單落差。
 
@@ -129,7 +131,7 @@ repo 已有 Doxygen、Sphinx、Go doc、pdoc 等產生的 HTML 或外部 API 站
 
 | 檢查 | 通過條件 |
 | --- | --- |
-| `capabilities --json` | 可解析 JSON；`version` 與 `--version` 一致；需要的功能 `id` 存在（不存在時已查 --help／Docs） |
+| `capabilities --json` | **0.13.3+** 才檢查：可解析 JSON；`version` 與 `--version` 一致；需要的功能 `id` 存在（不存在時已查 --help／Docs）。舊版沒有此指令時記為 fallback，不得假設能力 |
 | `docs --check` | exit 0、無 ERROR；WARN 逐條說明（輸出格式為 `WARN  <訊息>`） |
 | 歷史檔 | 檔案存在；`list` 可執行；筆數如實回報（0 筆＝骨架） |
 | `export` | exit 0；首頁 `<h1>` 等於設定的 `title`；`<title>` 以 `project` 開頭 |
